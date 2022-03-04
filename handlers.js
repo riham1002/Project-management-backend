@@ -24,6 +24,64 @@ function checkUsers(req, res) {
   });
 }
 
+function checkProject(req, res) {
+  const project_name = req.body.project_name;
+  const start_at = req.body.start_at;
+  const end_at = req.body.end_at;
+  const task_name = req.body.tasks;
+
+  db.query("SELECT project_name FROM projects WHERE project_name = $1", [
+    project_name,
+  ])
+    .then((result) => {
+      const project = result.rows;
+
+      if (project[0]) {
+        res.send({ adding: "exist" });
+      } else {
+        db.query(
+          "INSERT INTO projects (project_name, start_at, end_at) VALUES ($1,$2,$3) RETURNING id",
+          [project_name, start_at, end_at]
+        ).then((result) => {
+          const id = result.rows[0].id;
+          console.log(id);
+          task_name.forEach((element) => {
+            db.query(
+              "INSERT INTO tasks (task_name, project_id) VALUES ($1,$2)",
+              [element, id]
+            );
+          });
+        });
+        res.status(200).send({ adding: true });
+      }
+    })
+    .catch((err) => res.send({ error: err.message }));
+}
+
+function deleteProject(req, res) {
+  const project_name = req.body.project_name;
+  const start_at = req.body.start_at;
+  const end_at = req.body.end_at;
+  const task_name = req.body.tasks;
+
+  db.query(
+    "DELETE FROM projects (project_name, start_at, end_at) VALUES ($1,$2,$3) RETURNING id",
+    [project_name, start_at, end_at]
+  )
+    .then((result) => {
+      const id = result.rows[0].id;
+      console.log(id);
+      task_name.forEach((element) => {
+        db.query("DELETE FROM tasks (task_name, project_id) VALUES ($1,$2)", [
+          element,
+          id,
+        ]);
+      });
+      res.status(200).send({ deleted: true });
+    })
+    .catch((err) => res.send({ error: err.message }));
+}
+
 //   function logout(req, res) {
 //     res.clearCookie("user");
 //     res.redirect("/");
@@ -31,11 +89,10 @@ function checkUsers(req, res) {
 
 function projectsInfo(req, res) {
   db.query(
-    "SELECT  projects.id, projects.project_name, projects.start_at, projects.end_at, tasks.task_name FROM projects LEFT OUTER JOIN tasks ON projects.id=tasks.project_id ",
-   
+    "SELECT  projects.id, projects.project_name, projects.start_at, projects.end_at, tasks.task_name FROM projects LEFT OUTER JOIN tasks ON projects.id=tasks.project_id "
   ).then((result) => {
     const projectsInfo = result.rows;
-   
+
     res.send(projectsInfo);
   });
 }
@@ -67,4 +124,6 @@ module.exports = {
   // logout,
   signUp,
   projectsInfo,
+  checkProject,
+  deleteProject,
 };

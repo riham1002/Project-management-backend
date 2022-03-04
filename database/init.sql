@@ -5,8 +5,8 @@ DROP TABLE IF EXISTS projects, tasks, users CASCADE;
 CREATE TABLE projects (
   id SERIAL PRIMARY KEY,
   project_name VARCHAR(255) UNIQUE,
-  start_at DATE,
-    end_at DATE
+  start_at VARCHAR(255),
+    end_at VARCHAR(255)
 );
 
 CREATE TABLE tasks(
