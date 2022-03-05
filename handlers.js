@@ -77,7 +77,7 @@ function deleteProject(req, res) {
           id,
         ]);
       });
-      res.status(200).send({ deleted: true });
+      res.status(200).send({ delete: true });
     })
     .catch((err) => res.send({ error: err.message }));
 }
