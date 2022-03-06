@@ -16,6 +16,6 @@ router.post("/login", checkUsers);
 router.post("/signup", signUp);
 router.get("/projectsInfo", projectsInfo);
 router.post("/addProject", checkProject);
-router.post("/project", deleteProject);
+router.delete("/delete/:project_name", deleteProject);
 
 module.exports = router;

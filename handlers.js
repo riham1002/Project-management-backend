@@ -44,7 +44,7 @@ function checkProject(req, res) {
           [project_name, start_at, end_at]
         ).then((result) => {
           const id = result.rows[0].id;
-          console.log(id);
+
           task_name.forEach((element) => {
             db.query(
               "INSERT INTO tasks (task_name, project_id) VALUES ($1,$2)",
@@ -59,24 +59,16 @@ function checkProject(req, res) {
 }
 
 function deleteProject(req, res) {
-  const project_name = req.body.project_name;
-  const start_at = req.body.start_at;
-  const end_at = req.body.end_at;
-  const task_name = req.body.tasks;
-
-  db.query(
-    "DELETE FROM projects (project_name, start_at, end_at) VALUES ($1,$2,$3) RETURNING id",
-    [project_name, start_at, end_at]
-  )
+  const project_name = req.params.project_name;
+  db.query("SELECT id FROM projects WHERE project_name = $1", [project_name])
     .then((result) => {
       const id = result.rows[0].id;
-      console.log(id);
-      task_name.forEach((element) => {
-        db.query("DELETE FROM tasks (task_name, project_id) VALUES ($1,$2)", [
-          element,
-          id,
-        ]);
-      });
+      db.query("DELETE FROM tasks WHERE project_id = $1", [id]).then(
+        (result) => {
+          console.log(result, "mm");
+        }
+      );
+      db.query("DELETE FROM projects WHERE id = $1", [id]);
       res.status(200).send({ delete: true });
     })
     .catch((err) => res.send({ error: err.message }));
